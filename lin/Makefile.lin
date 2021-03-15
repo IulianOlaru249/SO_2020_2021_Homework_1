@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g
-OBJECTS = main.o
+PROJ_PATH = ./src
+OBJECTS = hash_map.o  main.o
 
 LDFLAGS = 
 
@@ -9,8 +10,11 @@ all: main
 main: $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) -o $@
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c $<
+main.o: $(PROJ_PATH)/main.c
+	$(CC) $(CFLAGS) $^ -c
+
+hash_map.o: $(PROJ_PATH)/hash_map.c $(PROJ_PATH)/hash_map.h
+	$(CC) $(CFLAGS) $^ -c
 
 clean:
 	rm -f *.o main
