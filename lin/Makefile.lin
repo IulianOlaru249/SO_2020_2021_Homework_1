@@ -1,0 +1,16 @@
+CC = gcc
+CFLAGS = -Wall -g
+OBJECTS = main.o
+
+LDFLAGS = 
+
+all: main
+
+main: $(OBJECTS)
+	$(CC) $^ $(LDFLAGS) -o $@
+
+main.o: main.c
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	rm -f *.o main
