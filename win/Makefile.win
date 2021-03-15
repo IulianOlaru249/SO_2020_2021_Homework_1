@@ -1,7 +1,10 @@
 OBJECTS = main.obj
+EXEC = so-cpp.exe
 
-main.exe: $(OBJECTS)
-	cl $**
+all: $(EXEC)
+
+$(EXEC): $(OBJECTS)
+	cl /Fe$@ $** 
 
 main.obj: main.c
 	cl /c $**
