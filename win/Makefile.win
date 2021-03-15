@@ -1,10 +1,17 @@
-OBJECTS = main.obj
+CC = cl
+PROJ_PATH = .\src
+OBJECTS = main.obj hash_map.obj
+
+all: main.exe
 
 main.exe: $(OBJECTS)
-	cl $**
+	$(CC) $**
 
-main.obj: main.c
-	cl /c $**
+main.obj: $(PROJ_PATH)\main.c
+	$(CC) /c $**
+
+hash_map.obj: $(PROJ_PATH)\hash_map.c $(PROJ_PATH)\hash_map.h
+	$(CC) /c $**
 
 clean:
 	del *.obj *.exe
