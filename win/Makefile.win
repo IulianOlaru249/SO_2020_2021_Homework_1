@@ -1,0 +1,10 @@
+OBJECTS = main.obj
+
+main.exe: $(OBJECTS)
+	cl $**
+
+main.obj: main.c
+	cl /c $**
+
+clean:
+	del *.obj *.exe
