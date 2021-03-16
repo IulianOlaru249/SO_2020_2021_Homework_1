@@ -11,6 +11,9 @@ void handle_D_flag(hash_map* map, char* param, char** argv, int i)
 {
     /* Parce definition members */
     char* def = "";
+    char* key = NULL;
+    char* value = NULL;
+
     if (param[2] == '\0') {
         def = argv[i + 1];
         /**
@@ -22,8 +25,8 @@ void handle_D_flag(hash_map* map, char* param, char** argv, int i)
         def = param + 2;
     }
 
-    char* key = strtok(def, "=");
-    char* value = strtok(NULL, "=");
+    key = strtok(def, "=");
+    value = strtok(NULL, "=");
 
     /* Store definition */
     if (value != NULL)
@@ -128,14 +131,14 @@ int main (int argc, char **argv) {
         fclose(in_file);
     }
 
-    // printf("\nMAP ENTRIES:\n-------------------\n");
-    // i = 0;
-    // for (; i < MAP_CAPACITY; i++) {
-    //     hash_map_entry* entry = map->entries[i];
-    //     if (entry != NULL) {
-    //         printf("%s-->%s\n", entry->key, entry->value);
-    //     }
-    // }
+    printf("\nMAP ENTRIES:\n-------------------\n");
+    i = 0;
+    for (; i < MAP_CAPACITY; i++) {
+        hash_map_entry* entry = map->entries[i];
+        if (entry != NULL) {
+            printf("%s-->%s\n", entry->key, entry->value);
+        }
+    }
 
     //printf("ASDFSDFAF: %d == %d\n", get_hash("BCD"), get_hash("VAR0"));
 

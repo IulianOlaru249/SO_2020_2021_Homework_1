@@ -6,7 +6,7 @@ OBJECTS = main.obj hash_map.obj
 build: $(EXEC)
 
 $(EXEC): $(OBJECTS)
-	$(CC) $**
+	$(CC) /Fe$@ $**
 
 main.obj: $(PROJ_PATH)\main.c
 	$(CC) /c $**
