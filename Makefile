@@ -1,10 +1,11 @@
 CC = cl
 PROJ_PATH = .\src
+EXEC = so-cpp.exe
 OBJECTS = main.obj hash_map.obj
 
-all: main.exe
+build: $(EXEC)
 
-main.exe: $(OBJECTS)
+$(EXEC): $(OBJECTS)
 	$(CC) $**
 
 main.obj: $(PROJ_PATH)\main.c
