@@ -8,7 +8,8 @@ hash_map* init_map()
     hash_map *new_map = (hash_map*)malloc(sizeof(struct _hash_map));
     new_map->entries_no = 0;
     new_map->entries = (hash_map_entry**)malloc(MAP_CAPACITY * sizeof(hash_map_entry*));
-    for (int i = 0; i < MAP_CAPACITY; i++) {
+    int i = 0;
+    for (; i < MAP_CAPACITY; i++) {
         new_map->entries[i] = NULL;
     }
 
@@ -21,8 +22,9 @@ int get_hash(char* value)
     int hash = 5381;
     int size = strlen(value);
     
-    for (int i = 0; i < size; i++) {
-        hash = ((hash << 5) + hash) + (value[i] - '0');
+    int i = 0;
+    for (; i < size; i++) {
+        hash = ((hash << 5) + hash - 1) + (value[i] - '0');
     }
 
     return hash % MAP_CAPACITY;
@@ -67,7 +69,8 @@ char* get(hash_map* map, char* key)
 
 void free_map(hash_map* map)
 {
-    for (int i = 0; i < MAP_CAPACITY; i++) {
+    int i = 0;
+    for (; i < MAP_CAPACITY; i++) {
         hash_map_entry* entry = map->entries[i];
         if (entry != NULL) {
             free(entry->key);
