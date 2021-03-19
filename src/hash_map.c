@@ -20,12 +20,11 @@ hash_map* init_map()
 /*http://www.cse.yorku.ca/~oz/hash.html*/
 int get_hash(char* value)
 {
-    int hash = 5381;
-    int size = strlen(value);
-    int i = 0;
-    for (; i < size; i++) {
-        hash = ((hash << 5) + hash - 2) + (value[i] - '0');
-    }
+    int hash = 0;
+    int c;
+
+	while ((c = *value++))
+	    hash += c;
 
     return hash % MAP_CAPACITY;
 }
@@ -64,10 +63,12 @@ char* get(hash_map* map, char* key)
 {
     int index = get_hash(key);
     hash_map_entry* target_entry = map->entries[index];
-    if (target_entry != NULL)
+    if (target_entry != NULL) {
         return target_entry->value;
-    else
+    }
+    else {
         return NULL;
+    }
 }
 
 void remove_entry(hash_map* map, char* key)

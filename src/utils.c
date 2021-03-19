@@ -82,12 +82,16 @@ void handle_flags(hash_map* map, char** out_file_name,
 
 void handle_define_directive(hash_map* map, FILE* in_file, char* line)
 {
-    char key[MAX_LINE_SIZE];
-    char value[MAX_LINE_SIZE];
+    char* aux = NULL;
+    char key[MAX_LINE_SIZE] = {};
+    char value[MAX_LINE_SIZE] = {};
     int white_space_counter = 0;
     strtok(line, " ");
     strcpy(key, strtok(NULL, " "));
-    strcpy(value, strtok(NULL, "\n"));
+    aux = strtok(NULL, "\n");
+    if (aux != NULL) {
+        strcpy(value, aux);
+    }
 
     /* While processing a multi-line define */
     while (value[strlen(value) - 1] == '\\') {
@@ -112,7 +116,7 @@ void handle_define_directive(hash_map* map, FILE* in_file, char* line)
 
 void handle_undef_directive(hash_map* map, char* line)
 {
-    char value[MAX_LINE_SIZE];
+    char value[MAX_LINE_SIZE] = {};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
@@ -123,8 +127,8 @@ void handle_undef_directive(hash_map* map, char* line)
 
 void handle_ifelse_directive(hash_map* map, FILE* in_file, char* line)
 {
-    char new_line[MAX_LINE_SIZE];
-    char value[MAX_LINE_SIZE];
+    char new_line[MAX_LINE_SIZE] = {};
+    char value[MAX_LINE_SIZE] = {};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
@@ -262,11 +266,13 @@ void replace_defines(hash_map* map, char line[MAX_LINE_SIZE])
 
 void handle_ifndef_directive(hash_map* map, char*line, FILE* in_file, char* processed_file)
 {
-    char value[MAX_LINE_SIZE];
+    char value[MAX_LINE_SIZE] = {};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
+
     if(get(map, value) == NULL) {
+
         while (fgets(line, MAX_LINE_SIZE, in_file)
                 && strncmp(line, "#endif", 6) != 0) {
             if (strncmp(line, "#define", 6) == 0) {
@@ -278,7 +284,8 @@ void handle_ifndef_directive(hash_map* map, char*line, FILE* in_file, char* proc
             }
 
             if (strncmp(line, "#undef", 6) != 0 &&
-                    strncmp(line, "#define", 7) != 0) {
+                    strncmp(line, "#define", 7) != 0 &&
+                    strncmp(line, "\n", 1) != 0) {
                 strcat(processed_file, line);
             }
         }
@@ -290,7 +297,7 @@ void handle_ifndef_directive(hash_map* map, char*line, FILE* in_file, char* proc
 
 void handle_ifdef_directive(hash_map* map, char*line, FILE* in_file, char* processed_file)
 {
-    char value[MAX_LINE_SIZE];
+    char value[MAX_LINE_SIZE] = {};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
@@ -305,9 +312,9 @@ void handle_ifdef_directive(hash_map* map, char*line, FILE* in_file, char* proce
                 /* Handle #undef keywords */
                 handle_undef_directive(map, line);
             }
-
             if (strncmp(line, "#undef", 6) != 0 &&
-                    strncmp(line, "#define", 7) != 0) {
+                    strncmp(line, "#define", 7) != 0 &&
+                    strncmp(line, "\n", 1) != 0) {
                 strcat(processed_file, line);
             }
         }
@@ -356,11 +363,10 @@ int handle_include_directive(char* processed_file, hash_map* map,
     return error_code;
 }
 
-
 int handle_input_files(char* processed_file, hash_map* map,
         FILE* in_file, char* in_file_name, char** in_file_dirs, int in_file_dir_no)
 {
-    char line[MAX_LINE_SIZE];
+    char line[MAX_LINE_SIZE] = {};
     int err_code = 0;
     /* For each line in the file */
     while (fgets(line, MAX_LINE_SIZE, in_file)) {
@@ -376,6 +382,7 @@ int handle_input_files(char* processed_file, hash_map* map,
         } else if (strncmp(line, "#ifndef", 7) == 0) {
             /* Handle #ifndef keywords */
             handle_ifndef_directive(map, line, in_file, processed_file);
+
         } else if (strncmp(line, "#ifdef", 6) == 0) {
             /* Handle #ifdef keywords */
             handle_ifdef_directive(map, line, in_file, processed_file);
