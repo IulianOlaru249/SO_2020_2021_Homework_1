@@ -1,148 +1,80 @@
 #include <stdio.h>
 #include "hash_map.h"
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include "utils.h"
 
-#define MAX_LINE_SIZE 256
-#define MAX_INPUT_FILES 100
+//valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ./so-cpp -Itest/dir_1 -I tets/_dir2/subdir -DAia=e -D ana=0 ../so-assignments/1-multi/checker/multi/_test/inputs/test9.in -o ./test.out
 
-void handle_D_flag(hash_map* map, char* param, char** argv, int i)
-{
-    /* Parce definition members */
-    char* def = "";
-    char* key = NULL;
-    char* value = NULL;
-
-    if (param[2] == '\0') {
-        def = argv[i + 1];
-        /**
-         * Skip the next param, since it is the value
-         * passed with the flag
-         */
-        i++;
-    } else {
-        def = param + 2;
-    }
-
-    key = strtok(def, "=");
-    value = strtok(NULL, "=");
-
-    /* Store definition */
-    if (value != NULL)
-        put(map, key, value);
-    else
-        put(map, key, "");
-}
-
-void handle_I_flag(char*** in_file_names, int* in_file_no, char* param, char** argv, int i)
-{
-    /* Get the pointer to the file name */
-    char* aux = NULL;
-    if (param[2] == '\0') {
-        aux = argv[i + 1];
-    } else {
-        aux = param + 2;
-    }
-
-    (*in_file_names)[*in_file_no] = aux;
-    *in_file_no = *in_file_no + 1;
-}
-
-void handle_o_flag(char** out_file_name, char*param, char**argv, int i)
-{
-    if (param[2] == '\0') {
-        *out_file_name = argv[i + 1];
-    } else {
-        *out_file_name = param + 2;
-    }
-}
-
-void handle_flags(hash_map* map, 
-        char** out_file_name, char*** in_file_names,
-        int* in_file_no, int argc, char** argv)
-{
-    int i = 0;
-    for (; i < argc; i++) {
-        char* param = argv[i];
-        /* If flag detected */
-        if (param[0] == '-') {
-            if (param[1] == 'D') {
-                /* Store definition in map */
-                handle_D_flag(map, param, argv, i);
-            } else if (param[1] == 'I') {
-                /* Save the path to input files */
-                handle_I_flag(in_file_names, in_file_no, param, argv, i);
-            } else if (param[1] == 'o') {
-                /* Save the name of the output file */
-                handle_o_flag(out_file_name, param, argv, i);
-            }
-        }
-    }
-}
 
 int main (int argc, char **argv) {
     hash_map* map = init_map();
     int in_file_no = 0;
+    int in_file_dir_no = 0;
+    char** in_file_dirs = (char**)malloc(MAX_INPUT_FILES * sizeof(char*));
     char** in_file_names = (char**)malloc(MAX_INPUT_FILES * sizeof(char*));
     char* out_file_name = NULL;
+    FILE* out_file = NULL;
+    char processed_file[MAX_FILE_SIZE];
     FILE* in_file = NULL;
-    char line[MAX_LINE_SIZE];
     int i = 0;
+    int invalid_input_files = 0;
+    int exit_code = 0;
 
-    handle_flags(map, &out_file_name, &in_file_names, &in_file_no, argc, argv);
+    handle_flags(map, &out_file_name,
+            &in_file_dirs, &in_file_dir_no,
+            &in_file_names, &in_file_no,
+            argc, argv);
 
-    /* For each input file received as parameter */
+    /**
+     * For each input file received as parameter, try open it
+     * and process it if it is valid.
+     */
+    strncpy(processed_file, "\0", 1);
     for(; i < in_file_no; i++) {
-        char key[MAX_LINE_SIZE];
-        char value[MAX_LINE_SIZE];
-        int white_space_counter = 0;
-
         in_file = fopen(in_file_names[i], "r");
-        /* For each line in the file */
-        while (fgets(line, MAX_LINE_SIZE, in_file)) {
-            /* Handle #define keywords */
-            if (strncmp(line, "#define", 6) == 0) {
-                strtok(line, " ");
-                strcpy(key, strtok(NULL, " "));
-                strcpy(value, strtok(NULL, "\n"));
-
-                /* While processing a multi-line define */
-                while (value[strlen(value) - 1] == '\\') {
-                    /* Get rid of thailing whitespace or 'whitespace + backslash' or backslash */
-                    if(value[strlen(value) - 2] == ' ')
-                        value[strlen(value) - 2] = '\0';
-                    else
-                        value[strlen(value) - 1] = '\0';
-
-                    /* gen the next line from the define, process it and append to value */
-                    if(!fgets(line, MAX_LINE_SIZE, in_file))
-                        break;
-
-                    white_space_counter = 0;
-                    while(isspace((unsigned char)line[white_space_counter])) white_space_counter++;
-                    line[strlen(line) - 1] = '\0';
-                    strcat(value, line + white_space_counter - 1);
-                }
-                
-                put(map, key, value);
+        if (strcmp("out", in_file_names[i] + strlen(in_file_names[i]) - 3) == 0) {
+            if (out_file_name == NULL) {
+                out_file_name = (char*)malloc(MAX_LINE_SIZE * sizeof(char));
+            }
+            strcpy(out_file_name, in_file_names[i]);       
+        } else {
+            if (in_file != NULL) {
+                exit_code = handle_input_files(processed_file, map, in_file, in_file_names[0], in_file_dirs, in_file_dir_no);
+                fclose(in_file);
+            } else {
+                invalid_input_files = 1;
+                exit_code = 1;
+                break;
             }
         }
-        fclose(in_file);
     }
 
-    printf("\nMAP ENTRIES:\n-------------------\n");
-    i = 0;
-    for (; i < MAP_CAPACITY; i++) {
-        hash_map_entry* entry = map->entries[i];
-        if (entry != NULL) {
-            printf("%s-->%s\n", entry->key, entry->value);
+    /* If there was no error opening the input files */
+    if (!invalid_input_files && !exit_code) {
+        /**
+         * When all input files are invalid or there were no input files
+         * to open, get the input from stdin.
+         */
+        if (in_file_no == 0) {
+            handle_input_files(processed_file, map, stdin, "./\0", in_file_dirs, in_file_dir_no);
+        }
+
+        /* Write to the output file */
+        if (out_file_name != NULL) {
+            out_file = fopen(out_file_name, "w");
+            if (out_file != NULL) {
+                fprintf(out_file, "%s", processed_file);
+                fclose(out_file);
+            } else {
+                exit_code = 1;
+            }
+            free(out_file_name);
+        } else {
+            fprintf(stdout, "%s", processed_file);
         }
     }
 
-    //printf("ASDFSDFAF: %d == %d\n", get_hash("BCD"), get_hash("VAR0"));
-
     free(in_file_names);
+    free(in_file_dirs);
     free_map(map);
-    return 0;
+    return exit_code;   
 }

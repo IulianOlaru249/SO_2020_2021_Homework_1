@@ -20,6 +20,8 @@ hash_map* init_map();
 int get_hash(char* value);
 void put(hash_map* map, char* key, char* value);
 char* get(hash_map* map, char* key);
+void remove_entry(hash_map* map, char* key);
+void print_map(hash_map* map);
 void free_map(hash_map* map);
 
 #endif

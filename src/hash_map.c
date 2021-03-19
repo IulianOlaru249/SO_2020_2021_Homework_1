@@ -24,7 +24,7 @@ int get_hash(char* value)
     int size = strlen(value);
     int i = 0;
     for (; i < size; i++) {
-        hash = ((hash << 5) + hash - 1) + (value[i] - '0');
+        hash = ((hash << 5) + hash - 2) + (value[i] - '0');
     }
 
     return hash % MAP_CAPACITY;
@@ -70,6 +70,21 @@ char* get(hash_map* map, char* key)
         return NULL;
 }
 
+void remove_entry(hash_map* map, char* key)
+{
+    hash_map_entry* entry = NULL;
+    int index = get_hash(key);
+    if (map->entries[index] == NULL) {
+        return;
+    } else {
+        entry = map->entries[index];
+        free(entry->key);
+        free(entry->value);
+        free(entry);
+        map->entries[index] = NULL;
+    }
+}
+
 void free_map(hash_map* map)
 {
     int i = 0;
@@ -83,4 +98,17 @@ void free_map(hash_map* map)
     }
     free(map->entries);
     free(map);
+}
+
+void print_map(hash_map* map)
+{
+    printf("\nMAP ENTRIES:\n-------------------\n");
+    printf("%d\n", map->entries_no);
+    int i = 0;
+    for (; i < MAP_CAPACITY; i++) {
+        hash_map_entry* entry = map->entries[i];
+        if (entry != NULL) {
+            printf("%s-->%s\n", entry->key, entry->value);
+        }
+    }
 }
