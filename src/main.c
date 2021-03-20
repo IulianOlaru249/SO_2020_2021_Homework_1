@@ -69,7 +69,7 @@ int main (int argc, char **argv) {
     if(exit_code == 0) {
         for(i = 0; i < in_file_no; i++) {
             /* If output files were passed as params (for whatever reason) */
-            if (strcmp("out", in_file_names[i] + strlen(in_file_names[i]) - 3) == 0) {
+            if (strncmp("out", in_file_names[i] + strlen(in_file_names[i]) - 3, 3) == 0) {
                 strncpy(out_file_name, in_file_names[i], MAX_LINE_SIZE);
             } else {
                 /* If the specified file is an input file */

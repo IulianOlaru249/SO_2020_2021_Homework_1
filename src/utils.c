@@ -176,10 +176,10 @@ int handle_define_directive(hash_map* map, FILE* in_file, char* line)
 
     /* Tokenize the line to get the key and value pair */
     strtok(line, " ");
-    strcpy(key, strtok(NULL, " "));
+    strncpy(key, strtok(NULL, " "), MAX_LINE_SIZE);
     aux = strtok(NULL, "\n");
     if (aux != NULL) {
-        strcpy(value, aux);
+        strncpy(value, aux, MAX_LINE_SIZE);
     }
 
     /* While processing a multi-line define */
@@ -199,7 +199,7 @@ int handle_define_directive(hash_map* map, FILE* in_file, char* line)
         white_space_counter = 0;
         while(isspace((unsigned char)line[white_space_counter])) white_space_counter++;
         line[strlen(line) - 1] = '\0';
-        strcat(value, line + white_space_counter - 1);
+        strncat(value, line + white_space_counter - 1, MAX_LINE_SIZE);
     }
 
     if (multiline) {
@@ -217,7 +217,7 @@ void handle_undef_directive(hash_map* map, char* line)
 {
     char value[MAX_LINE_SIZE] = {0};
     strtok(line, " ");
-    strcpy(value, strtok(NULL, "\n"));
+    strncpy(value, strtok(NULL, "\n"), MAX_LINE_SIZE);
 
     if(get(map, value) != NULL) {
         remove_entry(map, value);
@@ -256,13 +256,13 @@ void replace_defines(hash_map* map, char* line)
                     }
 
                     if (!inside_quotes) {
-                        strcpy(aux,  word + strlen(entry->key));
+                        strncpy(aux,  word + strlen(entry->key), MAX_LINE_SIZE);
                         i = 0;
                         for (; i < strlen(entry->value); i++) {
                             *(word + i) = entry->value[i];
                         }
                         *(word + i) = '\0';
-                        strcat(line, aux);
+                        strncat(line, aux, MAX_LINE_SIZE);
                     } else {
                         word = word + 1;
                     }
@@ -292,15 +292,15 @@ int handle_include_directive(hash_map* map, char* line,
     include_file_name[strlen(include_file_name) - 1] = '\0';
 
     /* Look for the include file in the path of the input file */
-    strcat(path, include_file_name + 1);
+    strncat(path, include_file_name + 1, MAX_LINE_SIZE);
 
     include_file = fopen(path, "r");
     if (include_file == NULL) {
         /* Look for the include file in all other paths received as params */
 
         for (i = 0; i < in_file_dir_no; i++) {
-            strcat(in_file_dirs[i], "/");
-            include_file = fopen(strcat(in_file_dirs[i], include_file_name + 1), "r");
+            strncat(in_file_dirs[i], "/", 1);
+            include_file = fopen(strncat(in_file_dirs[i], include_file_name + 1, MAX_LINE_SIZE), "r");
             if(include_file != NULL) {
                 break;
             }
@@ -384,7 +384,7 @@ int handle_false_branch(hash_map* map, char* line,
         if(strncmp(line, "#elif", 5) == 0) {
             /* Get the condition  for else if branches */
             strtok(line, " ");
-            strcpy(value, strtok(NULL, "\n"));
+            strncpy(value, strtok(NULL, "\n"), MAX_LINE_SIZE);
             /* evaluate condition */
             if(get(map, value) != NULL) {
                 replace_defines(map, value);
@@ -455,7 +455,7 @@ int handle_if_directive(hash_map* map, char* line,
     /* Evaluate the if condifion */
     if(get(map, value) != NULL) {
         replace_defines(map, value);
-        if (strcmp(value, "") == 0) {
+        if (strncmp(value, "\0", 1) == 0) {
             strncpy(value, "1\0", 2);
         }
     }
