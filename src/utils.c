@@ -228,7 +228,6 @@ void replace_defines(hash_map* map, char line[MAX_LINE_SIZE])
     char* closed_quotation = NULL;
     int inside_quotes = 0;
     int i = 0;
-    int j = 0;
 
     for(i = 0; i < MAP_CAPACITY; i++) {
         hash_map_entry* entry = map->entries[i];
