@@ -1,17 +1,19 @@
 #include "hash_map.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 hash_map* init_map()
 {
     int i = 0;
-    hash_map *new_map = (hash_map*)malloc(sizeof(struct _hash_map));
-    new_map->entries_no = 0;
-    new_map->entries = (hash_map_entry**)malloc(MAP_CAPACITY * sizeof(hash_map_entry*));
-
-    for (; i < MAP_CAPACITY; i++) {
-        new_map->entries[i] = NULL;
+    hash_map *new_map = NULL;
+    new_map = (hash_map*)malloc(sizeof(struct _hash_map));
+    if (new_map != NULL) {
+        new_map->entries_no = 0;
+        new_map->entries = NULL;
+        new_map->entries = (hash_map_entry**)malloc(MAP_CAPACITY * sizeof(hash_map_entry*));
+        if (new_map->entries != NULL) {
+            for (; i < MAP_CAPACITY; i++) {
+                new_map->entries[i] = NULL;
+            }
+        }
     }
 
     return new_map;
@@ -29,40 +31,82 @@ int get_hash(char* value)
     return hash % MAP_CAPACITY;
 }
 
-void put(hash_map* map, char* key, char* value)
+int put(hash_map* map, char* key, char* value)
 {
+    int err_code = 0;
     int index = get_hash(key);
     int key_size = 0;
     int value_size = 0;
     hash_map_entry* new_entry = NULL;
+    hash_map_entry* old_entry = NULL;
 
     if (map->entries[index] == NULL) {
-        map->entries_no++;
         /* Create new entry and allocate space for it */
+        map->entries_no++;
+        map->entries[index] = NULL;
         map->entries[index] = (hash_map_entry*)malloc(sizeof(struct _hash_map_entry));
-        new_entry = map->entries[index];
+        if (map->entries[index] == NULL) {
+            err_code = ENOMEM;
+        } else {
+            new_entry = map->entries[index];
+            key_size = strlen(key) + 1;
+            value_size = strlen(value) + 1;
 
-        key_size = strlen(key) + 1;
-        value_size = strlen(value) + 1;
-        new_entry->key = (char*)malloc(key_size * sizeof(char));
-        new_entry->value = (char*)malloc(value_size * sizeof(char));
-        strncpy(new_entry->key, key, key_size);
-        strncpy(new_entry->value, value, value_size);
+            /* Try alloc space for key */
+            new_entry->key = NULL;
+            new_entry->key = (char*)malloc(key_size * sizeof(char));
+            if (new_entry->key == NULL) {
+                err_code = ENOMEM;
+            }
 
+            /* Try alloc space for value */
+            new_entry->value = NULL;
+            new_entry->value = (char*)malloc(value_size * sizeof(char));
+            if (new_entry->value == NULL) {
+                err_code = ENOMEM;
+            }
+
+            /* If all went well */
+            if (err_code == 0) {
+                strncpy(new_entry->key, key, key_size);
+                strncpy(new_entry->value, value, value_size);
+            }
+        }
     } else {
         /* Updarte old entry */
-        hash_map_entry* old_entry = map->entries[index];
-        int value_size = strlen(value) + 1;
-        free(old_entry->value);
+        old_entry = map->entries[index];
+
+        /*Free old value */
+        if (old_entry->value != NULL) {
+            free(old_entry->value);
+        }
+
+        /* Try alloc space for new value */
+        value_size = strlen(value) + 1;
+        old_entry->value = NULL;
         old_entry->value = (char*)malloc(value_size * sizeof(char));
-        strncpy(old_entry->value, value, value_size);
+        if (old_entry->value == NULL) {
+            err_code = ENOMEM;
+        }
+
+        /* If all went well */
+        if (err_code == 0) {
+            strncpy(old_entry->value, value, value_size);
+        }
     }
+
+    return err_code;
 }
 
 char* get(hash_map* map, char* key)
 {
-    int index = get_hash(key);
-    hash_map_entry* target_entry = map->entries[index];
+    int index = -1;
+    hash_map_entry* target_entry = NULL;
+
+    /* Look for target */
+    index = get_hash(key);
+    target_entry = map->entries[index];
+
     if (target_entry != NULL) {
         return target_entry->value;
     }
@@ -74,13 +118,22 @@ char* get(hash_map* map, char* key)
 void remove_entry(hash_map* map, char* key)
 {
     hash_map_entry* entry = NULL;
-    int index = get_hash(key);
+    int index = 0;
+
+    index = get_hash(key);
     if (map->entries[index] == NULL) {
         return;
     } else {
         entry = map->entries[index];
-        free(entry->key);
-        free(entry->value);
+
+        if (entry->key != NULL) {
+            free(entry->key);
+        }
+
+        if(entry->value != NULL) {
+            free(entry->value);
+        }
+
         free(entry);
         map->entries[index] = NULL;
     }
@@ -89,28 +142,44 @@ void remove_entry(hash_map* map, char* key)
 void free_map(hash_map* map)
 {
     int i = 0;
-    for (; i < MAP_CAPACITY; i++) {
-        hash_map_entry* entry = map->entries[i];
+    hash_map_entry* entry = NULL;
+
+    if (map == NULL) {
+        return;
+    }
+
+    for (; i < MAP_CAPACITY && map->entries != NULL; i++) {
+        entry = map->entries[i];
         if (entry != NULL) {
-            free(entry->key);
-            free(entry->value);
+            if (entry->key != NULL) {
+                free(entry->key);
+            }
+            if (entry->value != NULL) {
+                free(entry->value);
+            }
             free(entry);
         }
     }
-    free(map->entries);
+
+    if(map->entries != NULL) {
+        free(map->entries);
+    }
+
     free(map);
 }
 
 void print_map(hash_map* map)
 {
     hash_map_entry* entry = NULL;
+    int i = 0;
+
     printf("\nMAP ENTRIES:\n-------------------\n");
     printf("%d\n", map->entries_no);
-    int i = 0;
     for (; i < MAP_CAPACITY; i++) {
         entry = map->entries[i];
         if (entry != NULL) {
             printf("%s-->%s\n", entry->key, entry->value);
         }
     }
+    printf("-------------------\n\n");
 }
