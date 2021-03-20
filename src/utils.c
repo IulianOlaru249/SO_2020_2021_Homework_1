@@ -299,7 +299,7 @@ int handle_include_directive(hash_map* map, char* line,
         /* Look for the include file in all other paths received as params */
 
         for (i = 0; i < in_file_dir_no; i++) {
-            strncat(in_file_dirs[i], "/", 1);
+            strncat(in_file_dirs[i], "/\0", 2);
             include_file = fopen(strncat(in_file_dirs[i], include_file_name + 1, MAX_LINE_SIZE), "r");
             if(include_file != NULL) {
                 break;
