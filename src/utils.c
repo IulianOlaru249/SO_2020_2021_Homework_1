@@ -83,8 +83,8 @@ void handle_flags(hash_map* map, char** out_file_name,
 void handle_define_directive(hash_map* map, FILE* in_file, char* line)
 {
     char* aux = NULL;
-    char key[MAX_LINE_SIZE] = {};
-    char value[MAX_LINE_SIZE] = {};
+    char key[MAX_LINE_SIZE] = {0};
+    char value[MAX_LINE_SIZE] = {0};
     int white_space_counter = 0;
     strtok(line, " ");
     strcpy(key, strtok(NULL, " "));
@@ -116,7 +116,7 @@ void handle_define_directive(hash_map* map, FILE* in_file, char* line)
 
 void handle_undef_directive(hash_map* map, char* line)
 {
-    char value[MAX_LINE_SIZE] = {};
+    char value[MAX_LINE_SIZE] = {0};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
@@ -127,8 +127,8 @@ void handle_undef_directive(hash_map* map, char* line)
 
 void handle_ifelse_directive(hash_map* map, FILE* in_file, char* line)
 {
-    char new_line[MAX_LINE_SIZE] = {};
-    char value[MAX_LINE_SIZE] = {};
+    char new_line[MAX_LINE_SIZE] = {0};
+    char value[MAX_LINE_SIZE] = {0};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
@@ -223,12 +223,19 @@ void handle_ifelse_directive(hash_map* map, FILE* in_file, char* line)
 void replace_defines(hash_map* map, char line[MAX_LINE_SIZE])
 {
     char* aux = NULL;
-    for(int i = 0; i < MAP_CAPACITY; i++) {
+    char* word = NULL;
+    char* open_quotation = NULL;
+    char* closed_quotation = NULL;
+    int inside_quotes = 0;
+    int i = 0;
+    int j = 0;
+
+    for(i = 0; i < MAP_CAPACITY; i++) {
         hash_map_entry* entry = map->entries[i];
-        char* word = line;
-        char* open_quotation = NULL;
-        char* closed_quotation = NULL;
-        int inside_quotes = 0;
+        word = line;
+        open_quotation = NULL;
+        closed_quotation = NULL;
+        inside_quotes = 0;
         /* Search for pos of open and closed quotes */
         open_quotation = strstr(line, "\"");
         if (open_quotation != NULL) {
@@ -248,7 +255,8 @@ void replace_defines(hash_map* map, char line[MAX_LINE_SIZE])
                     if (!inside_quotes) {
                         aux = (char*)malloc(MAX_LINE_SIZE * sizeof(char));
                         strcpy(aux,  word + strlen(entry->key));
-                        int i = 0;
+                        //int i = 0;
+                        i = 0;
                         for (; i < strlen(entry->value); i++) {
                             *(word + i) = entry->value[i];
                         }
@@ -266,7 +274,7 @@ void replace_defines(hash_map* map, char line[MAX_LINE_SIZE])
 
 void handle_ifndef_directive(hash_map* map, char*line, FILE* in_file, char* processed_file)
 {
-    char value[MAX_LINE_SIZE] = {};
+    char value[MAX_LINE_SIZE] = {0};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
@@ -297,7 +305,7 @@ void handle_ifndef_directive(hash_map* map, char*line, FILE* in_file, char* proc
 
 void handle_ifdef_directive(hash_map* map, char*line, FILE* in_file, char* processed_file)
 {
-    char value[MAX_LINE_SIZE] = {};
+    char value[MAX_LINE_SIZE] = {0};
     strtok(line, " ");
     strcpy(value, strtok(NULL, "\n"));
 
@@ -330,7 +338,7 @@ int handle_include_directive(char* processed_file, hash_map* map,
 {
     int error_code = 0;
     FILE* include_file = NULL;
-    char path[MAX_LINE_SIZE] = {};
+    char path[MAX_LINE_SIZE] = {0};
     char *include_file_name;
     int i = 0;
 
@@ -366,7 +374,7 @@ int handle_include_directive(char* processed_file, hash_map* map,
 int handle_input_files(char* processed_file, hash_map* map,
         FILE* in_file, char* in_file_name, char** in_file_dirs, int in_file_dir_no)
 {
-    char line[MAX_LINE_SIZE] = {};
+    char line[MAX_LINE_SIZE] = {0};
     int err_code = 0;
     /* For each line in the file */
     while (fgets(line, MAX_LINE_SIZE, in_file)) {

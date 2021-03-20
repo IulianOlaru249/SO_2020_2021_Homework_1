@@ -103,11 +103,12 @@ void free_map(hash_map* map)
 
 void print_map(hash_map* map)
 {
+    hash_map_entry* entry = NULL;
     printf("\nMAP ENTRIES:\n-------------------\n");
     printf("%d\n", map->entries_no);
     int i = 0;
     for (; i < MAP_CAPACITY; i++) {
-        hash_map_entry* entry = map->entries[i];
+        entry = map->entries[i];
         if (entry != NULL) {
             printf("%s-->%s\n", entry->key, entry->value);
         }
