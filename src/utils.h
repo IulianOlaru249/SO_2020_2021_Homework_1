@@ -32,7 +32,8 @@ int handle_D_flag(hash_map *map, char *param, char **argv, int *i);
  * @argv: all command line parameters
  * @i: index of current parameter
  */
-void handle_I_flag(char ***in_file_dirs, int *in_file_dir_no, char *param, char **argv, int *i);
+void handle_I_flag(char ***in_file_dirs, int *in_file_dir_no,
+	char *param, char **argv, int *i);
 
 /**
  * handle_o_flag() - This function is called when -o flag is encountered.
@@ -46,8 +47,9 @@ void handle_I_flag(char ***in_file_dirs, int *in_file_dir_no, char *param, char 
 void handle_o_flag(char *out_file_name, char *param, char **argv, int *i);
 
 /**
- * handle_flags() - This function is called if there are command line arguments.
- * Decides whics handle to call based on the flags received in the command line.
+ * handle_flags() - This function is called if there are command
+ * line arguments. Decides whics handle to call based on the
+ * flags received in the command line.
  *
  * @map: hash map of definitions
  * @in_file_names: address of array to keep track if input files
@@ -67,8 +69,9 @@ int handle_flags(hash_map *map,
 	char **argv, int argc);
 
 /**
- * process_input_file() - This function is called in order to process a file
- * line by line and builds the result in a new buffer.
+ * process_input_file() - This function is called in
+ * order to process a file line by line and builds the
+ * result in a new buffer.
  *
  * @map: hash map of definitions
  * @in_file_names: address of array to keep track if input files

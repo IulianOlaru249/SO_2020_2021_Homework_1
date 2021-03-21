@@ -81,7 +81,9 @@ int main(int argc, char **argv)
 
 	/* Handle the output if the file was processed fine */
 	if (exit_code == 0) {
-		/* If there was no input file sp[ecified, take input from stdin */
+		/* If there was no input file sp[ecified,
+		 * take input from stdin
+		 */
 		if (in_file_no == 0) {
 			exit_code = process_input_file(map,
 				stdin, "./\0",

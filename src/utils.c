@@ -91,8 +91,9 @@ void handle_o_flag(char *out_file_name, char *param, char **argv, int *i)
 }
 
 /**
- * handle_flags() - This function is called if there are command line arguments.
- * Decides whics handle to call based on the flags received in the command line.
+ * handle_flags() - This function is called if there are
+ * command line arguments. Decides whics handle to call based on the
+ * flags received in the command line.
  *
  * @map: hash map of definitions
  * @in_file_names: address of array to keep track if input files
@@ -124,7 +125,8 @@ int handle_flags(hash_map *map,
 				err_code = handle_D_flag(map, param, argv, &i);
 			} else if (param[1] == 'I') {
 				/* Save the path to input files */
-				handle_I_flag(in_file_dirs, in_file_dir_no, param, argv, &i);
+				handle_I_flag(in_file_dirs,
+					in_file_dir_no, param, argv, &i);
 			} else if (param[1] == 'o') {
 				/* Save the name of the output file */
 				handle_o_flag(out_file_name, param, argv, &i);
@@ -267,7 +269,9 @@ int handle_define_directive(hash_map *map, FILE *in_file, char *line)
 	/* While processing a multi-line define */
 	while (value[strlen(value) - 1] == '\\') {
 		multiline = 1;
-		/* Get rid of thailing whitespace or 'whitespace + backslash' or backslash */
+		/* Get rid of thailing whitespace or
+		 * 'whitespace + backslash' or backslash
+		 */
 		if (value[strlen(value) - 2] == ' ')
 			value[strlen(value) - 2] = '\0';
 		else
@@ -277,7 +281,9 @@ int handle_define_directive(hash_map *map, FILE *in_file, char *line)
 		if (!fgets(line, MAX_LINE_SIZE, in_file))
 			break;
 
-		/* Get the next line from the define, process it and append to value */
+		/* Get the next line from the define,
+		 * process it and append to value
+		 */
 		white_space_counter = 0;
 		while (isspace((unsigned char)line[white_space_counter]))
 			white_space_counter++;
@@ -423,7 +429,9 @@ int handle_include_directive(hash_map *map, char *line,
 
 	include_file = fopen(path, "r");
 	if (include_file == NULL) {
-		/* Look for the include file in all other paths received as params */
+		/* Look for the include file in all other
+		 * paths received as params
+		 */
 		for (i = 0; i < in_file_dir_no; i++) {
 			strncat(in_file_dirs[i], "/\0", 2);
 			include_file = fopen(strncat(in_file_dirs[i],

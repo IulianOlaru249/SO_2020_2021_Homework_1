@@ -16,7 +16,8 @@ hash_map *init_map(void)
 	if (new_map != NULL) {
 		new_map->entries_no = 0;
 		new_map->entries = NULL;
-		new_map->entries = (hash_map_entry **)malloc(MAP_CAPACITY * sizeof(hash_map_entry *));
+		new_map->entries = (hash_map_entry **)malloc(
+			MAP_CAPACITY * sizeof(hash_map_entry *));
 		if (new_map->entries != NULL)
 			for (; i < MAP_CAPACITY; i++)
 				new_map->entries[i] = NULL;
@@ -74,8 +75,8 @@ int put(hash_map *map, char *key, char *value)
 		/* Create new entry and allocate space for it */
 		map->entries_no++;
 		map->entries[index] = NULL;
-		map->entries[index] =
-			(hash_map_entry *)malloc(sizeof(struct _hash_map_entry));
+		map->entries[index] = (hash_map_entry *)malloc(
+			sizeof(struct _hash_map_entry));
 		if (map->entries[index] == NULL) {
 			err_code = ENOMEM;
 		} else {
