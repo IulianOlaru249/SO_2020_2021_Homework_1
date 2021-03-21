@@ -11,8 +11,8 @@
 /**  */
 typedef struct _hash_map_entry {
     int hash;
-    char* key;
-    char* value;
+    char key[256];
+    char value[256];
 } hash_map_entry;
 
 /**  */

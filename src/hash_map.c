@@ -15,24 +15,26 @@ hash_map* init_map()
             }
         }
     }
-
     return new_map;
 }
 
 /*http://www.cse.yorku.ca/~oz/hash.html*/
 int get_hash(char* value)
 {
+
     int hash = 0;
     int c;
 
 	while ((c = *value++))
 	    hash += c;
 
+
     return hash % MAP_CAPACITY;
 }
 
 int put(hash_map* map, char* key, char* value)
 {
+
     int err_code = 0;
     int index = get_hash(key);
     int key_size = 0;
@@ -52,20 +54,6 @@ int put(hash_map* map, char* key, char* value)
             key_size = strlen(key) + 1;
             value_size = strlen(value) + 1;
 
-            /* Try alloc space for key */
-            new_entry->key = NULL;
-            new_entry->key = (char*)malloc(key_size * sizeof(char));
-            if (new_entry->key == NULL) {
-                err_code = ENOMEM;
-            }
-
-            /* Try alloc space for value */
-            new_entry->value = NULL;
-            new_entry->value = (char*)malloc(value_size * sizeof(char));
-            if (new_entry->value == NULL) {
-                err_code = ENOMEM;
-            }
-
             /* If all went well */
             if (err_code == 0) {
                 strncpy(new_entry->key, key, key_size);
@@ -75,19 +63,7 @@ int put(hash_map* map, char* key, char* value)
     } else {
         /* Updarte old entry */
         old_entry = map->entries[index];
-
-        /*Free old value */
-        if (old_entry->value != NULL) {
-            free(old_entry->value);
-        }
-
-        /* Try alloc space for new value */
         value_size = strlen(value) + 1;
-        old_entry->value = NULL;
-        old_entry->value = (char*)malloc(value_size * sizeof(char));
-        if (old_entry->value == NULL) {
-            err_code = ENOMEM;
-        }
 
         /* If all went well */
         if (err_code == 0) {
@@ -100,6 +76,7 @@ int put(hash_map* map, char* key, char* value)
 
 char* get(hash_map* map, char* key)
 {
+
     int index = -1;
     hash_map_entry* target_entry = NULL;
 
@@ -108,6 +85,7 @@ char* get(hash_map* map, char* key)
     target_entry = map->entries[index];
 
     if (target_entry != NULL) {
+
         return target_entry->value;
     }
     else {
@@ -125,15 +103,6 @@ void remove_entry(hash_map* map, char* key)
         return;
     } else {
         entry = map->entries[index];
-
-        if (entry->key != NULL) {
-            free(entry->key);
-        }
-
-        if(entry->value != NULL) {
-            free(entry->value);
-        }
-
         free(entry);
         map->entries[index] = NULL;
     }
@@ -151,12 +120,6 @@ void free_map(hash_map* map)
     for (; i < MAP_CAPACITY && map->entries != NULL; i++) {
         entry = map->entries[i];
         if (entry != NULL) {
-            if (entry->key != NULL) {
-                free(entry->key);
-            }
-            if (entry->value != NULL) {
-                free(entry->value);
-            }
             free(entry);
         }
     }
