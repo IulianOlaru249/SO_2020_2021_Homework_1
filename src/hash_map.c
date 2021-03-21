@@ -74,7 +74,8 @@ int put(hash_map *map, char *key, char *value)
 		/* Create new entry and allocate space for it */
 		map->entries_no++;
 		map->entries[index] = NULL;
-		map->entries[index] = (hash_map_entry *)malloc(sizeof(struct _hash_map_entry));
+		map->entries[index] =
+			(hash_map_entry *)malloc(sizeof(struct _hash_map_entry));
 		if (map->entries[index] == NULL) {
 			err_code = ENOMEM;
 		} else {
@@ -139,12 +140,12 @@ void remove_entry(hash_map *map, char *key)
 	int index = 0;
 
 	index = get_hash(key);
-	if (map->entries[index] == NULL) {
-		return;
-	} else {
+	if (map->entries[index] != NULL) {
 		entry = map->entries[index];
 		free(entry);
 		map->entries[index] = NULL;
+	} else {
+		return;
 	}
 }
 

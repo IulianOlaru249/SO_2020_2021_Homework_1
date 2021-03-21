@@ -529,70 +529,72 @@ int handle_false_branch(hash_map *map, char *line,
 	char new_line[MAX_LINE_SIZE] = {0};
 	char value[MAX_LINE_SIZE] = {0};
 
-	/**
-	 *  Skip over lines as long as no endif is found
-	 *  or no else or elseif branch is found.
-	 */
-	while (fgets(line, MAX_LINE_SIZE, in_file)
-			&& strncmp(line, "#endif", 6) != 0) {
-		if (strncmp(line, "#elif", 5) == 0) {
-			/* Get the condition  for else if branches */
-			strtok(line, " ");
-			strncpy(value, strtok(NULL, "\n"), MAX_LINE_SIZE);
-			/* evaluate condition */
-			if (get(map, value) != NULL)
-				replace_defines(map, value);
+/**
+ *  Skip over lines as long as no endif is found
+ *  or no else or elseif branch is found.
+ *  Note: this ugly indentation is needed because off a
+ * false positive checkpatch: too may starting tabs.
+ */
+while (fgets(line, MAX_LINE_SIZE, in_file)
+		&& strncmp(line, "#endif", 6) != 0) {
+	if (strncmp(line, "#elif", 5) == 0) {
+		/* Get the condition  for else if branches */
+		strtok(line, " ");
+		strncpy(value, strtok(NULL, "\n"), MAX_LINE_SIZE);
+		/* evaluate condition */
+		if (get(map, value) != NULL)
+			replace_defines(map, value);
 
-			/**
-			 * If the condition is true copy the code block
-			 * to the line, else don't care. Keep looking for
-			 * #else statements
-			 */
-			if (atoi(value) != 0) {
-				strncpy(line, "\0", 1);
-				while (fgets(new_line, MAX_LINE_SIZE, in_file) &&
-						strncmp(new_line, "#endif", 6) != 0) {
+		/**
+		 * If the condition is true copy the code block
+		 * to the line, else don't care. Keep looking for
+		 * #else statements
+		 */
+		if (atoi(value) != 0) {
+			strncpy(line, "\0", 1);
+			while (fgets(new_line, MAX_LINE_SIZE, in_file) &&
+					strncmp(new_line, "#endif", 6) != 0) {
 
-					if (strncmp(new_line, "#elif", 5) == 0 ||
-							strncmp(new_line, "#else", 5) == 0) {
-						/* Skip till #endif statement */
-						while (fgets(new_line, MAX_LINE_SIZE, in_file) &&
-								strncmp(new_line, "#endif", 6) != 0) {
-							;
-						}
-						break;
+				if (strncmp(new_line, "#elif", 5) == 0 ||
+						strncmp(new_line, "#else", 5) == 0) {
+					/* Skip till #endif statement */
+					while (fgets(new_line, MAX_LINE_SIZE, in_file) &&
+							strncmp(new_line, "#endif", 6) != 0) {
+						;
 					}
+					break;
+				}
 
-					if (strncmp(line, "\n", 1) != 0) {
-						/* Process the line befor adding it to the buffer */
-						if (strncmp(new_line, "#", 1) == 0)
-							err_code = process_line(map, new_line,
-									in_file, in_file_name,
-									in_file_dirs, in_file_dir_no,
-									processed_file);
+				if (strncmp(line, "\n", 1) != 0) {
+					/* Process the line befor adding it to the buffer */
+					if (strncmp(new_line, "#", 1) == 0)
+						err_code = process_line(map, new_line,
+								in_file, in_file_name,
+								in_file_dirs, in_file_dir_no,
+								processed_file);
 
-						if (strncmp(new_line, "\n", 1) != 0 &&
-								strncmp(new_line, "#", 1) != 0) {
-							replace_defines(map, new_line);
-							strncat(line, new_line, MAX_LINE_SIZE);
-						}
+					if (strncmp(new_line, "\n", 1) != 0 &&
+							strncmp(new_line, "#", 1) != 0) {
+						replace_defines(map, new_line);
+						strncat(line, new_line, MAX_LINE_SIZE);
 					}
 				}
-				break;
 			}
-		}
-
-		/* If else statement found */
-		if (strncmp(line, "#else", 5) == 0) {
-			err_code = handle_true_branch(map, line,
-					in_file, in_file_name,
-					in_file_dirs, in_file_dir_no,
-					processed_file);
 			break;
 		}
 	}
 
-	return err_code;
+	/* If else statement found */
+	if (strncmp(line, "#else", 5) == 0) {
+		err_code = handle_true_branch(map, line,
+				in_file, in_file_name,
+				in_file_dirs, in_file_dir_no,
+				processed_file);
+		break;
+	}
+}
+
+return err_code;
 }
 
 /**

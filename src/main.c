@@ -53,7 +53,9 @@ int main(int argc, char **argv)
 	/* Handle the input files if the params were handled fine */
 	if (exit_code == 0) {
 		for (i = 0; i < in_file_no; i++) {
-			/* If output files were passed as params (for whatever reason) */
+			/* If output files were passed as params
+			 * (for whatever reason)
+			 */
 			if (strncmp("out", in_file_names[i] +
 					strlen(in_file_names[i]) - 3, 3) == 0) {
 				strncpy(out_file_name, in_file_names[i], MAX_LINE_SIZE);
@@ -61,10 +63,7 @@ int main(int argc, char **argv)
 				/* If the specified file is an input file */
 				in_file = fopen(in_file_names[i], "r");
 				/* If is not a valid file */
-				if (in_file == NULL) {
-					exit_code = ENOENT;
-					break;
-				} else {
+				if (in_file != NULL) {
 					/* If it was a valid file, process it */
 					exit_code = process_input_file(map,
 						in_file, in_file_names[i],
@@ -72,6 +71,9 @@ int main(int argc, char **argv)
 						processed_file);
 
 					fclose(in_file);
+				} else {
+					exit_code = ENOENT;
+					break;
 				}
 			}
 		}
