@@ -122,14 +122,16 @@ int handle_flags(hash_map *map,
 		if (param[0] == '-') {
 			if (param[1] == 'D') {
 				/* Store definition in map */
-				err_code = handle_D_flag(map, param, argv, &i);
+				err_code = handle_D_flag(map,
+					param, argv, &i);
 			} else if (param[1] == 'I') {
 				/* Save the path to input files */
 				handle_I_flag(in_file_dirs,
 					in_file_dir_no, param, argv, &i);
 			} else if (param[1] == 'o') {
 				/* Save the name of the output file */
-				handle_o_flag(out_file_name, param, argv, &i);
+				handle_o_flag(out_file_name,
+					param, argv, &i);
 			}
 		} else {
 			/* If it was an input file */
@@ -288,7 +290,8 @@ int handle_define_directive(hash_map *map, FILE *in_file, char *line)
 		while (isspace((unsigned char)line[white_space_counter]))
 			white_space_counter++;
 		line[strlen(line) - 1] = '\0';
-		strncat(value, line + white_space_counter - 1, MAX_LINE_SIZE);
+		strncat(value, line + white_space_counter - 1,
+			MAX_LINE_SIZE);
 	}
 
 	if (multiline) {
@@ -355,8 +358,10 @@ void replace_defines(hash_map *map, char *line)
 				inside_quotes = 0;
 			}
 
-			if (line[i] == ' ' || line[i] == '\n' || line[i] == '\t' ||
-					line[i] == ')' || line[i] == ';' || line[i] == '\0') {
+			if (line[i] == ' ' || line[i] == '\n' ||
+					line[i] == '\t' ||
+					line[i] == ')' || line[i] == ';' ||
+					line[i] == '\0') {
 				/* Lookup word in map*/
 				word[j] = '\0';
 				value = NULL;
@@ -366,7 +371,9 @@ void replace_defines(hash_map *map, char *line)
 				/* If hit */
 				if (value != NULL) {
 					found_word = 1;
-					/* Save the rest of the line after keyword */
+					/* Save the rest of the
+					 * line after keyword
+					 */
 					strncpy(aux, &line[i], MAX_LINE_SIZE);
 					/* Append new word and  */
 					line[i - strlen(word)] = '\0';
@@ -491,7 +498,8 @@ int handle_true_branch(hash_map *map, char *line,
 		if (strncmp(new_line, "#else", 5) == 0 ||
 				strncmp(new_line, "#elif", 5) == 0) {
 			while (strncmp(new_line, "#endif", 6) != 0
-					&& fgets(new_line, MAX_LINE_SIZE, in_file) != NULL) {
+					&& fgets(new_line,
+					MAX_LINE_SIZE, in_file) != NULL) {
 				;
 			}
 		} else {
@@ -564,27 +572,38 @@ while (fgets(line, MAX_LINE_SIZE, in_file)
 					strncmp(new_line, "#endif", 6) != 0) {
 
 				if (strncmp(new_line, "#elif", 5) == 0 ||
-						strncmp(new_line, "#else", 5) == 0) {
+						strncmp(new_line,
+							"#else", 5) == 0) {
 					/* Skip till #endif statement */
-					while (fgets(new_line, MAX_LINE_SIZE, in_file) &&
-							strncmp(new_line, "#endif", 6) != 0) {
+					while (fgets(
+						new_line,
+						MAX_LINE_SIZE, in_file) &&
+						strncmp(new_line,
+							"#endif", 6) != 0) {
 						;
 					}
 					break;
 				}
 
 				if (strncmp(line, "\n", 1) != 0) {
-					/* Process the line befor adding it to the buffer */
+					/* Process the line befor adding
+					 * it to the buffer
+					 */
 					if (strncmp(new_line, "#", 1) == 0)
-						err_code = process_line(map, new_line,
-								in_file, in_file_name,
-								in_file_dirs, in_file_dir_no,
-								processed_file);
+						err_code = process_line(map,
+							new_line,
+							in_file, in_file_name,
+							in_file_dirs,
+							in_file_dir_no,
+							processed_file);
 
 					if (strncmp(new_line, "\n", 1) != 0 &&
-							strncmp(new_line, "#", 1) != 0) {
-						replace_defines(map, new_line);
-						strncat(line, new_line, MAX_LINE_SIZE);
+						strncmp(new_line,
+							"#", 1) != 0) {
+						replace_defines(map,
+							new_line);
+						strncat(line, new_line,
+							MAX_LINE_SIZE);
 					}
 				}
 			}

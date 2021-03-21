@@ -65,10 +65,10 @@ int main(int argc, char **argv)
 				/* If is not a valid file */
 				if (in_file != NULL) {
 					/* If it was a valid file, process it */
-					exit_code = process_input_file(map,
-						in_file, in_file_names[i],
-						in_file_dir_names, in_file_dir_no,
-						processed_file);
+				exit_code = process_input_file(map,
+					in_file, in_file_names[i],
+					in_file_dir_names, in_file_dir_no,
+					processed_file);
 
 					fclose(in_file);
 				} else {
