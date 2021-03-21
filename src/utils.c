@@ -116,6 +116,8 @@ int process_input_file(hash_map* map,
              * definitions and add to final reult.
              */
             replace_defines(map, line);
+            replace_defines(map, line);
+
             strncat(processed_file, line, MAX_FILE_SIZE);
         }
     }
@@ -226,50 +228,66 @@ void handle_undef_directive(hash_map* map, char* line)
 
 void replace_defines(hash_map* map, char* line)
 {
-    char* word = NULL;
-    char* open_quotation = NULL;
-    char* closed_quotation = NULL;
     char aux[MAX_LINE_SIZE] = {0};
-    int inside_quotes = 0;
+    char word[MAX_LINE_SIZE] = {0};
     int i = 0;
+    int j = 0;
+    char* value = NULL;
+    int line_len = 0;
+    int inside_quotes = 0;
+    int found_word = 1;
 
-    for(i = 0; i < MAP_CAPACITY; i++) {
-        hash_map_entry* entry = map->entries[i];
-        word = line;
-        open_quotation = NULL;
-        closed_quotation = NULL;
-        inside_quotes = 0;
-        /* Search for pos of open and closed quotes */
-        open_quotation = strstr(line, "\"");
-        if (open_quotation != NULL) {
-            closed_quotation = strstr(open_quotation + 1, "\"");
-        }
+    line_len = strlen(line);
 
-        if (entry != NULL) {
-            while (word != NULL) {
-                word = strstr(word, entry->key);
+    /* Repeat replacement untill there are no more words to replace */
+    do{
+        found_word = 0;
+        /* Iterate trough line looking for matches in the map */
+        for(i = 0; i <= line_len; i++) {
+            /* Check if inside quotes */
+            if (line[i] == '\"' && inside_quotes == 0) {
+                /* Found first quote */
+                inside_quotes = 1;
+            }
+            if (line[i] == '\"' && inside_quotes == 1) {
+                /* Found second quote */
                 inside_quotes = 0;
-                if (word != NULL) {
-                    if ((open_quotation != NULL && closed_quotation != NULL) &&
-                            (open_quotation < word && closed_quotation > word)) {
-                        inside_quotes = 1;
-                    }
+            }
 
-                    if (!inside_quotes) {
-                        strncpy(aux,  word + strlen(entry->key), MAX_LINE_SIZE);
-                        i = 0;
-                        for (; i < strlen(entry->value); i++) {
-                            *(word + i) = entry->value[i];
-                        }
-                        *(word + i) = '\0';
-                        strncat(line, aux, MAX_LINE_SIZE);
-                    } else {
-                        word = word + 1;
-                    }
+            if(line[i] == ' ' || line[i] == '\n' || line[i] == '\t' || line[i] == ')' || line[i] == ';' || line[i] == '\0') {
+                /* Lookup word in map*/
+                word[j] = '\0';
+                value = NULL;
+                if (inside_quotes == 0 && isalpha(word[0])) {
+                    value = get(map, word);
                 }
+
+                /* If hit */
+                if (value != NULL) {
+                    found_word = 1;
+                    /* Save the rest of the line after keyword */
+                    strncpy(aux, &line[i], MAX_LINE_SIZE);
+                    /* Append new word and  */
+                    line[i - strlen(word)] = '\0';
+                    strncat(line, value, MAX_LINE_SIZE);
+                    /* Append the rest of def */
+                    strncat(line, aux, MAX_LINE_SIZE);
+                }
+                /* Reset word */
+                memset(word, 0, MAX_LINE_SIZE);
+                j = 0;
+            } else {
+                word[j] = line[i];
+                j++;
             }
         }
-    }
+
+        /* If there are no more words to replace */
+        if (found_word == 0) {
+            break;
+        }
+
+    } while(1);
 }
 
 int handle_include_directive(hash_map* map, char* line, 
@@ -336,11 +354,8 @@ int handle_true_branch(hash_map* map, char* line,
      * Append to the line everything that
      * is not in an else branch
      */
-
     while (fgets(new_line, MAX_LINE_SIZE, in_file) &&
             strncmp(new_line, "#endif", 6) != 0 ) {
-        //printf("%s\n", new_line);
-        //print_map(map);
         /* Skip everything that is in an else or elif branch */
         if (strncmp(new_line, "#else", 5) == 0 ||
                 strncmp(new_line, "#elif", 5) == 0) {

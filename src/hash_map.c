@@ -36,11 +36,16 @@ int put(hash_map* map, char* key, char* value)
 {
 
     int err_code = 0;
-    int index = get_hash(key);
+    int index = 0;
     int key_size = 0;
     int value_size = 0;
     hash_map_entry* new_entry = NULL;
     hash_map_entry* old_entry = NULL;
+
+    if(key[strlen(key) - 1] == '\n') {
+        key[strlen(key) - 1] = '\0';
+    }
+    index = get_hash(key);
 
     if (map->entries[index] == NULL) {
         /* Create new entry and allocate space for it */
